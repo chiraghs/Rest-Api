@@ -9,9 +9,13 @@ const postsroute=require('./routes/posts');
 //middleware to get 
 app.use('/posts',postsroute)
 
-app.get('/',(req,res) => {
-    res.send('Home Page');
-});
+//set up static files
+app.use(express.static('public'));
+// use body-parser middleware
+app.use(bodyParser.json());
+
+// initialize routes
+app.use('/posts', require('./routes/posts'));
 
 //connect to DB
 mongoose.connect(
@@ -20,4 +24,16 @@ mongoose.connect(
     ()=> console.log("Connection established")
 )
 
-app.listen(3000)
+app.get('/',(req,res) => {
+    res.send('Home Page');
+});
+
+// error handling middleware
+app.use(function(err, req, res, next){
+    console.log(err); 
+    res.status(422).send({error: err.message});
+});
+
+app.listen(process.env.port || 3000, function(){
+    console.log('now listening for requests');
+});
